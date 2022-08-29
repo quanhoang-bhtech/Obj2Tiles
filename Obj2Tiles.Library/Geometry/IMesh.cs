@@ -9,7 +9,7 @@ public interface IMesh
         out IMesh right);
 
     Vertex3 GetVertexBaricenter();
-    void WriteObj(string path, bool removeUnused = true);
+    void WriteObj(string path, bool removeUnused = false);
     
     int FacesCount { get; }
     int VertexCount { get; }

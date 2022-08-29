@@ -424,7 +424,7 @@ namespace Obj2Tiles.Stages.Model
                                 bool hasTexCoord = int.TryParse(word2, out texIndex);
                                 int.TryParse(word3, out normalIndex);
                                 vertexIndex = ShiftIndex(vertexIndex, readVertexList.Count);
-                                if (hasTexCoord)
+                                if (hasTexCoord && readTexCoordList!=null)
                                 {
                                     texIndex = ShiftIndex(texIndex, readTexCoordList.Count);
                                 }

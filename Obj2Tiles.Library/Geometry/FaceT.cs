@@ -15,7 +15,7 @@ public class FaceT : Face
     }
 
     public FaceT(int indexA, int indexB, int indexC, int textureIndexA, int textureIndexB,
-        int textureIndexC, int materialIndex) : base(indexA, indexB, indexC)
+        int textureIndexC, int materialIndex, int normalA, int normalB, int normalC) : base(indexA, indexB, indexC, normalA, normalB, normalC)
     {
 
         TextureIndexA = textureIndexA;
@@ -27,6 +27,10 @@ public class FaceT : Face
 
     public override string ToObj()
     {
+        if (HasNormal())
+        {
+            return $"f {IndexA + 1}/{TextureIndexA + 1}/{NormalA + 1} {IndexB + 1}/{TextureIndexB + 1}/{NormalB + 1} {IndexC + 1}/{TextureIndexC + 1}/{NormalC + 1}";
+        }
         return $"f {IndexA + 1}/{TextureIndexA + 1} {IndexB + 1}/{TextureIndexB + 1} {IndexC + 1}/{TextureIndexC + 1}";
     }
 }
