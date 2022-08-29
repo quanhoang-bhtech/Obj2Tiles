@@ -23,7 +23,7 @@ public class Options
     [Option('l', "lods", Required = false, HelpText = "How many levels of details", Default = 3)]
     public int LODs { get; set; }
 
-    [Option('k', "keeptextures", Required = false, HelpText = "Keeps original textures", Default = false)]
+    [Option('k', "keeptextures", Required = false, HelpText = "Keeps original textures", Default = true)]
     public bool KeepOriginalTextures { get; set; }
     
     [Option("lat", Required = false, HelpText = "Latitude of the mesh", Default = null)]

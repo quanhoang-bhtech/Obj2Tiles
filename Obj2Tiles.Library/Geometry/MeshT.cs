@@ -250,7 +250,7 @@ public class MeshT : IMesh
         IDictionary<Vertex3, int> leftVerticesNormal,
         IDictionary<Vertex3, int> rightVerticesNormal,
         int indexTextureVL, int indexTextureVR1, int indexTextureVR2,
-        int indexNormalVR, int indexNormalVL1, int indexNormalVL2,
+        int indexNormalVL, int indexNormalVR1, int indexNormalVR2,
         IDictionary<Vertex2, int> leftTextureVertices, IDictionary<Vertex2, int> rightTextureVertices,
         int materialIndex, ICollection<FaceT> leftFaces, ICollection<FaceT> rightFaces)
     {
@@ -262,13 +262,13 @@ public class MeshT : IMesh
         var tVR1 = _textureVertices[indexTextureVR1];
         var tVR2 = _textureVertices[indexTextureVR2];
 
-        var vnVR = _verticesNormal[indexNormalVR];
-        var vnVL1 = _verticesNormal[indexNormalVL1];
-        var vnVL2 = _verticesNormal[indexNormalVL2];
+        var vnVL = _verticesNormal[indexNormalVL];
+        var vnVR1 = _verticesNormal[indexNormalVR1];
+        var vnVR2 = _verticesNormal[indexNormalVR2];
 
         var indexVLLeft = leftVertices.AddIndex(vL);
         var indexTextureVLLeft = leftTextureVertices.AddIndex(tVL);
-
+        var indexNormalVLLeft = leftVerticesNormal.AddIndex(vnVL);
         if (Math.Abs(utils.GetDimension(vR1) - q) < Common.Epsilon &&
             Math.Abs(utils.GetDimension(vR2) - q) < Common.Epsilon)
         {
@@ -280,12 +280,12 @@ public class MeshT : IMesh
             var indexTextureVR1Left = leftTextureVertices.AddIndex(tVR1);
             var indexTextureVR2Left = leftTextureVertices.AddIndex(tVR2);
 
-            var indexNormalALeft = leftVerticesNormal!.AddIndex(vnVR);
-            var indexNormalBLeft = leftVerticesNormal!.AddIndex(vnVL1);
-            var indexNormalCLeft = leftVerticesNormal!.AddIndex(vnVL2);
+           
+            var indexNormalVR1Left = leftVerticesNormal!.AddIndex(vnVR1);
+            var indexNormalVR2Left = leftVerticesNormal!.AddIndex(vnVR2);
 
             leftFaces.Add(new FaceT(indexVLLeft, indexVR1Left, indexVR2Left,
-                indexTextureVLLeft, indexTextureVR1Left, indexTextureVR2Left, materialIndex, indexNormalALeft, indexNormalBLeft, indexNormalCLeft));
+                indexTextureVLLeft, indexTextureVR1Left, indexTextureVR2Left, materialIndex, indexNormalVLLeft, indexNormalVR1Left, indexNormalVR2Left));
 
             return;
         }
@@ -309,12 +309,18 @@ public class MeshT : IMesh
         var indexTextureVR1Right = rightTextureVertices.AddIndex(tVR1);
         var indexTextureVR2Right = rightTextureVertices.AddIndex(tVR2);
 
+        var indexNormalVR1Right = rightVerticesNormal.AddIndex(vnVR1);
+        var indexNormalVR2Right = rightVerticesNormal.AddIndex(vnVR2);
+
         var perc1 = Common.GetIntersectionPerc(vL, vR1, t1);
 
         // Prima intersezione texture
         var t1t = tVL.CutEdgePerc(tVR1, perc1);
         var indexTextureT1Left = leftTextureVertices.AddIndex(t1t);
         var indexTextureT1Right = rightTextureVertices.AddIndex(t1t);
+
+        var indexNormalT1Left = leftVerticesNormal.AddIndex(vnVR1);
+        var indexNormalT1Right = rightVerticesNormal.AddIndex(vnVR1);
 
         var perc2 = Common.GetIntersectionPerc(vL, vR2, t2);
 
@@ -323,23 +329,20 @@ public class MeshT : IMesh
         var indexTextureT2Left = leftTextureVertices.AddIndex(t2t);
         var indexTextureT2Right = rightTextureVertices.AddIndex(t2t);
 
-        var indexNormalAT2Left = leftVerticesNormal!.AddIndex(vnVR);
-        var indexNormalBT2Left = leftVerticesNormal!.AddIndex(vnVL1);
-        var indexNormalCT2Left = leftVerticesNormal!.AddIndex(vnVL2);
+        var indexNormalT2Left = leftVerticesNormal.AddIndex(vnVR2);
+        var indexNormalT2Right = rightVerticesNormal.AddIndex(vnVR2);
 
         var lface = new FaceT(indexVLLeft, indexT1Left, indexT2Left,
-            indexTextureVLLeft, indexTextureT1Left, indexTextureT2Left, materialIndex, indexNormalAT2Left, indexNormalBT2Left, indexNormalCT2Left);
+            indexTextureVLLeft, indexTextureT1Left, indexTextureT2Left, materialIndex, indexNormalVLLeft, indexNormalT1Left, indexNormalT2Left);
         leftFaces.Add(lface);
 
-        var indexNormalAT2Right = rightVerticesNormal!.AddIndex(vnVR);
-        var indexNormalBT2Right = rightVerticesNormal!.AddIndex(vnVL1);
-        var indexNormalCT2Right = rightVerticesNormal!.AddIndex(vnVL2);
+      
         var rface1 = new FaceT(indexT1Right, indexVR1Right, indexVR2Right,
-            indexTextureT1Right, indexTextureVR1Right, indexTextureVR2Right, materialIndex, indexNormalAT2Right, indexNormalBT2Right, indexNormalCT2Right);
+            indexTextureT1Right, indexTextureVR1Right, indexTextureVR2Right, materialIndex, indexNormalT1Right, indexNormalVR1Right, indexNormalVR2Right);
         rightFaces.Add(rface1);
 
         var rface2 = new FaceT(indexT1Right, indexVR2Right, indexT2Right,
-            indexTextureT1Right, indexTextureVR2Right, indexTextureT2Right, materialIndex, indexNormalAT2Right, indexNormalBT2Right, indexNormalCT2Right);
+            indexTextureT1Right, indexTextureVR2Right, indexTextureT2Right, materialIndex, indexNormalT1Right, indexNormalVR2Right, indexNormalT2Right);
         rightFaces.Add(rface2);
     }
 
@@ -368,6 +371,8 @@ public class MeshT : IMesh
         var indexVRRight = rightVertices.AddIndex(vR);
         var indexTextureVRRight = rightTextureVertices.AddIndex(tVR);
 
+        var indexNormalVRRight = rightVerticesNormal.AddIndex(vnVR);
+
         if (Math.Abs(utils.GetDimension(vL1) - q) < Common.Epsilon &&
             Math.Abs(utils.GetDimension(vL2) - q) < Common.Epsilon)
         {
@@ -379,11 +384,11 @@ public class MeshT : IMesh
             var indexTextureVL1Right = rightTextureVertices.AddIndex(tVL1);
             var indexTextureVL2Right = rightTextureVertices.AddIndex(tVL2);
 
-            var indexNormalARight = rightVerticesNormal!.AddIndex(vnVR);
-            var indexNormalBRight = rightVerticesNormal!.AddIndex(vnVL1);
-            var indexNormalCRight = rightVerticesNormal!.AddIndex(vnVL2);
+            var indexNormalVL1Righ = rightVerticesNormal.AddIndex(vnVL1);
+            var indexNormalVL2Right = rightVerticesNormal.AddIndex(vnVL2);
+
             rightFaces.Add(new FaceT(indexVRRight, indexVL1Right, indexVL2Right,
-                indexTextureVRRight, indexTextureVL1Right, indexTextureVL2Right, materialIndex, indexNormalARight, indexNormalBRight, indexNormalCRight));
+                indexTextureVRRight, indexTextureVL1Right, indexTextureVL2Right, materialIndex, indexNormalVRRight, indexNormalVL1Righ, indexNormalVL2Right));
 
             return;
         }
@@ -407,12 +412,18 @@ public class MeshT : IMesh
         var indexTextureVL1Left = leftTextureVertices.AddIndex(tVL1);
         var indexTextureVL2Left = leftTextureVertices.AddIndex(tVL2);
 
+        var indexNormalVL1Left = leftVerticesNormal.AddIndex(vnVL1);
+        var indexNormalVL2Left = leftVerticesNormal.AddIndex(vnVL2);
+
         var perc1 = Common.GetIntersectionPerc(vR, vL1, t1);
 
         // Prima intersezione texture
         var t1t = tVR.CutEdgePerc(tVL1, perc1);
         var indexTextureT1Left = leftTextureVertices.AddIndex(t1t);
         var indexTextureT1Right = rightTextureVertices.AddIndex(t1t);
+
+        var indexNormalT1Left = leftVerticesNormal.AddIndex(vnVL1);
+        var indexNormalT1Right = rightVerticesNormal.AddIndex(vnVL1);
 
         var perc2 = Common.GetIntersectionPerc(vR, vL2, t2);
 
@@ -421,24 +432,19 @@ public class MeshT : IMesh
         var indexTextureT2Left = leftTextureVertices.AddIndex(t2t);
         var indexTextureT2Right = rightTextureVertices.AddIndex(t2t);
 
-        var lindexNormalARight = rightVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBRight = rightVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCRight = rightVerticesNormal!.AddIndex(vnVL2);
+        var indexNormalT2Left = leftVerticesNormal.AddIndex(vnVL2);
+        var indexNormalT2Right = rightVerticesNormal.AddIndex(vnVL2);
 
         var rface = new FaceT(indexVRRight, indexT1Right, indexT2Right,
-            indexTextureVRRight, indexTextureT1Right, indexTextureT2Right, materialIndex, lindexNormalARight, lindexNormalBRight, lindexNormalCRight);
+            indexTextureVRRight, indexTextureT1Right, indexTextureT2Right, materialIndex, indexNormalVRRight, indexNormalT1Right, indexNormalT2Right);
         rightFaces.Add(rface);
 
-        var lindexNormalALeft = leftVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBLeft = leftVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCLeft = leftVerticesNormal!.AddIndex(vnVL2);
-
         var lface1 = new FaceT(indexT2Left, indexVL1Left, indexVL2Left,
-            indexTextureT2Left, indexTextureVL1Left, indexTextureVL2Left, materialIndex, lindexNormalALeft, lindexNormalBLeft, lindexNormalCLeft);
+            indexTextureT2Left, indexTextureVL1Left, indexTextureVL2Left, materialIndex, indexNormalT2Left, indexNormalVL1Left, indexNormalVL2Left);
         leftFaces.Add(lface1);
 
         var lface2 = new FaceT(indexT2Left, indexT1Left, indexVL1Left,
-            indexTextureT2Left, indexTextureT1Left, indexTextureVL1Left, materialIndex, lindexNormalALeft, lindexNormalBLeft, lindexNormalCLeft);
+            indexTextureT2Left, indexTextureT1Left, indexTextureVL1Left, materialIndex, indexNormalT2Left, indexNormalT1Left, indexNormalVL1Left);
         leftFaces.Add(lface2);
     }
 
