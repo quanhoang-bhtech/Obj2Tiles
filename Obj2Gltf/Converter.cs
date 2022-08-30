@@ -352,13 +352,13 @@ namespace SilentWave.Obj2Gltf
             {
                 var matName = fg.Key;
                 var f = new Face(matName);
-                
+
                 foreach (var ff in fg)
                     f.Triangles.AddRange(ff.Triangles);
-                
+
                 if (f.Triangles.Count > 0)
                     faces.Add(f);
-                
+
             }
 
             // Vertex attributes are shared by all primitives in the mesh
@@ -423,25 +423,39 @@ namespace SilentWave.Obj2Gltf
                     var v1 = objModel.Vertices[v1Index];
                     var v2 = objModel.Vertices[v2Index];
                     var v3 = objModel.Vertices[v3Index];
-                   
+
                     var n1 = new SVec3();
                     var n2 = new SVec3();
                     var n3 = new SVec3();
-                    
+                    var n1Index = -1;
+                    var n2Index = -1;
+                    var n3Index = -1;
                     if (triangle.V1.N > 0) // hasNormals
                     {
-                        var n1Index = triangle.V1.N - 1;
-                        var n2Index = triangle.V2.N - 1;
-                        var n3Index = triangle.V3.N - 1;
-                        n1 = objModel.Normals[n1Index];
-                        n2 = objModel.Normals[n2Index];
-                        n3 = objModel.Normals[n3Index];
+                        n1Index = triangle.V1.N - 1;
+                        n2Index = triangle.V2.N - 1;
+                        n3Index = triangle.V3.N - 1;
+                        if (objModel.Normals.Count > n1Index)
+                        {
+                            n1 = objModel.Normals[n1Index];
+                        }
+
+                        if (objModel.Normals.Count > n2Index)
+                        {
+                            n2 = objModel.Normals[n2Index];
+                        }
+
+                        if (objModel.Normals.Count > n3Index)
+                        {
+                            n3 = objModel.Normals[n3Index];
+                        }
+
                     }
 
                     var t1 = new SVec2();
                     var t2 = new SVec2();
                     var t3 = new SVec2();
-                    
+
                     if (materialHasTexture)
                     {
                         if (triangle.V1.T > 0) // hasUvs
@@ -462,7 +476,7 @@ namespace SilentWave.Obj2Gltf
 
                         bufferState.AddPosition(v1);
 
-                        if (triangle.V1.N > 0) // hasNormals
+                        if (n1Index > 0) // hasNormals
                         {
                             bufferState.AddNormal(n1);
                         }
@@ -482,7 +496,7 @@ namespace SilentWave.Obj2Gltf
                         faceVertexCache.Add(v2Str, faceVertexCount++);
 
                         bufferState.AddPosition(v2);
-                        if (triangle.V2.N > 0) // hasNormals
+                        if (n2Index > 0) // hasNormals
                         {
                             bufferState.AddNormal(n2);
                         }
@@ -502,7 +516,7 @@ namespace SilentWave.Obj2Gltf
                         faceVertexCache.Add(v3Str, faceVertexCount++);
 
                         bufferState.AddPosition(v3);
-                        if (triangle.V3.N > 0) // hasNormals
+                        if (n3Index > 0) // hasNormals
                         {
                             bufferState.AddNormal(n3);
                         }

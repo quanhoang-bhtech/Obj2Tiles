@@ -15,7 +15,7 @@ public class Face
     }
     public bool HasNormal()
     {
-        return NormalA != 0 && NormalB != 0 && NormalC != 0;
+        return NormalA > 0 && NormalB > 0 && NormalC > 0;
     }
     public Face(int indexA, int indexB, int indexC, int normalA, int normalB = 0, int normalC = 0)
     {

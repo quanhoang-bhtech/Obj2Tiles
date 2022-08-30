@@ -88,7 +88,7 @@ public class MeshT : IMesh
                         var indexATextureLeft = leftTextureVertices!.AddIndex(vtA);
                         var indexBTextureLeft = leftTextureVertices!.AddIndex(vtB);
                         var indexCTextureLeft = leftTextureVertices!.AddIndex(vtC);
-                        if (face.HasNormal())
+                        if (face.HasNormal() && _verticesNormal.Count > face.NormalA && _verticesNormal.Count > face.NormalB && _verticesNormal.Count > face.NormalC)
                         {
                             var vnA = _verticesNormal[face.NormalA];
                             var vnB = _verticesNormal[face.NormalB];
@@ -196,24 +196,33 @@ public class MeshT : IMesh
                         var indexATextureRight = rightTextureVertices!.AddIndex(vtA);
                         var indexBTextureRight = rightTextureVertices!.AddIndex(vtB);
                         var indexCTextureRight = rightTextureVertices!.AddIndex(vtC);
-                        if (face.HasNormal())
+                        try
                         {
-                            var vnA = _verticesNormal[face.NormalA];
-                            var vnB = _verticesNormal[face.NormalB];
-                            var vnC = _verticesNormal[face.NormalC];
+                            if (face.HasNormal() && _verticesNormal.Count> face.NormalA && _verticesNormal.Count > face.NormalB && _verticesNormal.Count > face.NormalC)
+                            {
+                                var vnA = _verticesNormal[face.NormalA];
+                                var vnB = _verticesNormal[face.NormalB];
+                                var vnC = _verticesNormal[face.NormalC];
 
-                            var indexNormalARight = rightVerticesNormal!.AddIndex(vnA);
-                            var indexNormalBRight = rightVerticesNormal!.AddIndex(vnB);
-                            var indexNormalCRight = rightVerticesNormal!.AddIndex(vnC);
-                            rightFaces.Add(new FaceT(indexARight, indexBRight, indexCRight, indexATextureRight, indexBTextureRight, indexCTextureRight,
-                                face.MaterialIndex, indexNormalARight, indexNormalBRight, indexNormalCRight));
+                                var indexNormalARight = rightVerticesNormal!.AddIndex(vnA);
+                                var indexNormalBRight = rightVerticesNormal!.AddIndex(vnB);
+                                var indexNormalCRight = rightVerticesNormal!.AddIndex(vnC);
+                                rightFaces.Add(new FaceT(indexARight, indexBRight, indexCRight, indexATextureRight, indexBTextureRight, indexCTextureRight,
+                                    face.MaterialIndex, indexNormalARight, indexNormalBRight, indexNormalCRight));
+                            }
+                            else
+                            {
+                                rightFaces.Add(new FaceT(indexARight, indexBRight, indexCRight,
+                                    indexATextureRight, indexBTextureRight, indexCTextureRight,
+                                    face.MaterialIndex, 0, 0, 0));
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            rightFaces.Add(new FaceT(indexARight, indexBRight, indexCRight,
-                                indexATextureRight, indexBTextureRight, indexCTextureRight,
-                                face.MaterialIndex, 0, 0, 0));
+                            
+                            throw ex;
                         }
+                        
 
                     }
                 }

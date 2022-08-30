@@ -182,7 +182,7 @@ public class Mesh : IMesh
     }
 
     private void IntersectLeft2D(IVertexUtils utils, double q, int indexVL, int indexVR1, int indexVR2,
-        int indexNormalVR, int indexNormalVL1, int indexNormalVL2,
+         int indexNormalVL, int indexNormalVR1, int indexNormalVR2,
         IDictionary<Vertex3, int> leftVertices,
         IDictionary<Vertex3, int> rightVertices,
         IDictionary<Vertex3, int> leftVerticesNormal,
@@ -193,11 +193,12 @@ public class Mesh : IMesh
         var vR1 = _vertices[indexVR1];
         var vR2 = _vertices[indexVR2];
 
-        var vnVR = _verticesNormal[indexNormalVR];
-        var vnVL1 = _verticesNormal[indexNormalVL1];
-        var vnVL2 = _verticesNormal[indexNormalVL2];
-        var indexVLLeft = leftVertices.AddIndex(vL);
+        var vnVL = _verticesNormal[indexNormalVL];
+        var vnVR1 = _verticesNormal[indexNormalVR1];
+        var vnVR2 = _verticesNormal[indexNormalVR2];
 
+        var indexVLLeft = leftVertices.AddIndex(vL);
+        var indexNormalVLLeft = leftVerticesNormal.AddIndex(vnVL);
         if (Math.Abs(utils.GetDimension(vR1) - q) < Common.Epsilon &&
             Math.Abs(utils.GetDimension(vR2) - q) < Common.Epsilon)
         {
@@ -206,10 +207,10 @@ public class Mesh : IMesh
             var indexVR1Left = leftVertices.AddIndex(vR1);
             var indexVR2Left = leftVertices.AddIndex(vR2);
 
-            var indexNormalALeft = leftVerticesNormal!.AddIndex(vnVR);
-            var indexNormalBLeft = leftVerticesNormal!.AddIndex(vnVL1);
-            var indexNormalCLeft = leftVerticesNormal!.AddIndex(vnVL2);
-            leftFaces.Add(new Face(indexVLLeft, indexVR1Left, indexVR2Left, indexNormalALeft, indexNormalBLeft, indexNormalCLeft));
+            var indexNormalVR1Left = leftVerticesNormal!.AddIndex(vnVR1);
+            var indexNormalVR2Left = leftVerticesNormal!.AddIndex(vnVR2);
+
+            leftFaces.Add(new Face(indexVLLeft, indexVR1Left, indexVR2Left, indexNormalVLLeft, indexNormalVR1Left, indexNormalVR2Left));
             //leftFaces.Add(new Face(indexVLLeft, indexVR1Left, indexVR2Left, 0, 0, 0));
             return;
         }
@@ -229,23 +230,24 @@ public class Mesh : IMesh
         var indexT2Left = leftVertices.AddIndex(t2);
         var indexT2Right = rightVertices.AddIndex(t2);
 
-        var lindexNormalALeft = leftVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBLeft = leftVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCLeft = leftVerticesNormal!.AddIndex(vnVL2);
+        var indexNormalVR1Right = rightVerticesNormal.AddIndex(vnVR1);
+        var indexNormalVR2Right = rightVerticesNormal.AddIndex(vnVR2);
 
-        var lface = new Face(indexVLLeft, indexT1Left, indexT2Left, lindexNormalALeft, lindexNormalBLeft, lindexNormalCLeft);
+        var indexNormalT1Left = leftVerticesNormal.AddIndex(vnVR1);
+        var indexNormalT1Right = rightVerticesNormal.AddIndex(vnVR1);
+
+        var indexNormalT2Left = leftVerticesNormal.AddIndex(vnVR2);
+        var indexNormalT2Right = rightVerticesNormal.AddIndex(vnVR2);
+
+        var lface = new Face(indexVLLeft, indexT1Left, indexT2Left, indexNormalVLLeft, indexNormalT1Left, indexNormalT2Left);
         //var lface = new Face(indexVLLeft, indexT1Left, indexT2Left, 0, 0, 0);
         leftFaces.Add(lface);
 
-        var lindexNormalARight = rightVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBRight = rightVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCRight = rightVerticesNormal!.AddIndex(vnVL2);
-
-        var rface1 = new Face(indexT1Right, indexVR1Right, indexVR2Right, lindexNormalARight, lindexNormalBRight, lindexNormalCRight);
+        var rface1 = new Face(indexT1Right, indexVR1Right, indexVR2Right, indexNormalT1Right, indexNormalVR1Right, indexNormalVR2Right);
         //var rface1 = new Face(indexT1Right, indexVR1Right, indexVR2Right, 0, 0, 0);
         rightFaces.Add(rface1);
 
-        var rface2 = new Face(indexT1Right, indexVR2Right, indexT2Right, lindexNormalARight, lindexNormalBRight, lindexNormalCRight);
+        var rface2 = new Face(indexT1Right, indexVR2Right, indexT2Right, indexNormalT1Right, indexNormalVR2Right, indexNormalT2Right);
         //var rface2 = new Face(indexT1Right, indexVR2Right, indexT2Right, 0, 0, 0);
         rightFaces.Add(rface2);
     }
@@ -265,6 +267,7 @@ public class Mesh : IMesh
         var vnVL1 = _verticesNormal[indexNormalVL1];
         var vnVL2 = _verticesNormal[indexNormalVL2];
         var indexVRRight = rightVertices.AddIndex(vR);
+        var indexNormalVRRight = rightVerticesNormal.AddIndex(vnVR);
 
         if (Math.Abs(utils.GetDimension(vL1) - q) < Common.Epsilon &&
             Math.Abs(utils.GetDimension(vL2) - q) < Common.Epsilon)
@@ -274,11 +277,10 @@ public class Mesh : IMesh
             var indexVL1Right = rightVertices.AddIndex(vL1);
             var indexVL2Right = rightVertices.AddIndex(vL2);
 
-            var indexNormalARight = rightVerticesNormal!.AddIndex(vnVR);
-            var indexNormalBRight = rightVerticesNormal!.AddIndex(vnVL1);
-            var indexNormalCRight = rightVerticesNormal!.AddIndex(vnVL2);
+            var indexNormalVL1Righ = rightVerticesNormal.AddIndex(vnVL1);
+            var indexNormalVL2Right = rightVerticesNormal.AddIndex(vnVL2);
 
-            rightFaces.Add(new Face(indexVRRight, indexVL1Right, indexVL2Right, indexNormalARight, indexNormalBRight, indexNormalCRight));
+            rightFaces.Add(new Face(indexVRRight, indexVL1Right, indexVL2Right, indexNormalVRRight, indexNormalVL1Righ, indexNormalVL2Right));
             //rightFaces.Add(new Face(indexVRRight, indexVL1Right, indexVL2Right, 0, 0, 0));
 
             return;
@@ -299,23 +301,25 @@ public class Mesh : IMesh
         var indexT2Left = leftVertices.AddIndex(t2);
         var indexT2Right = rightVertices.AddIndex(t2);
 
-        var lindexNormalARight = rightVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBRight = rightVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCRight = rightVerticesNormal!.AddIndex(vnVL2);
+        var indexNormalVL1Left = leftVerticesNormal.AddIndex(vnVL1);
+        var indexNormalVL2Left = leftVerticesNormal.AddIndex(vnVL2);
 
-        var rface = new Face(indexVRRight, indexT1Right, indexT2Right, lindexNormalARight, lindexNormalBRight, lindexNormalCRight);
+        var indexNormalT1Left = leftVerticesNormal.AddIndex(vnVL1);
+        var indexNormalT1Right = rightVerticesNormal.AddIndex(vnVL1);
+
+        var indexNormalT2Left = leftVerticesNormal.AddIndex(vnVL2);
+        var indexNormalT2Right = rightVerticesNormal.AddIndex(vnVL2);
+
+        var rface = new Face(indexVRRight, indexT1Right, indexT2Right, indexNormalVRRight, indexNormalT1Right, indexNormalT2Right);
         //var rface = new Face(indexVRRight, indexT1Right, indexT2Right, 0, 0, 0);
         rightFaces.Add(rface);
 
-        var lindexNormalALeft = leftVerticesNormal!.AddIndex(vnVR);
-        var lindexNormalBLeft = leftVerticesNormal!.AddIndex(vnVL1);
-        var lindexNormalCLeft = leftVerticesNormal!.AddIndex(vnVL2);
 
-        var lface1 = new Face(indexT2Left, indexVL1Left, indexVL2Left, lindexNormalALeft, lindexNormalBLeft, lindexNormalCLeft);
+        var lface1 = new Face(indexT2Left, indexVL1Left, indexVL2Left, indexNormalT2Left, indexNormalVL1Left, indexNormalVL2Left);
         //var lface1 = new Face(indexT2Left, indexVL1Left, indexVL2Left, 0, 0, 0);
         leftFaces.Add(lface1);
 
-        var lface2 = new Face(indexT2Left, indexT1Left, indexVL1Left, lindexNormalALeft, lindexNormalBLeft, lindexNormalCLeft);
+        var lface2 = new Face(indexT2Left, indexT1Left, indexVL1Left, indexNormalT2Left, indexNormalT1Left, indexNormalVL1Left);
         //var lface2 = new Face(indexT2Left, indexT1Left, indexVL1Left, 0, 0, 0);
         leftFaces.Add(lface2);
     }

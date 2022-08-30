@@ -57,14 +57,14 @@ public class MeshUtils
                     textureVertices.Add(vtx);
                     break;
                 case "vn":
-                    if(segs.Length == 4)
+                    if (segs.Length == 4)
                     {
                         verticesNormal.Add(new Vertex3(
                                                double.Parse(segs[1], CultureInfo.InvariantCulture),
                                                double.Parse(segs[2], CultureInfo.InvariantCulture),
                                                double.Parse(segs[3], CultureInfo.InvariantCulture)));
                     }
-                    
+
                     break;
                 case "usemtl" when segs.Length == 2:
                     {
@@ -156,7 +156,7 @@ public class MeshUtils
         dependencies = deps.ToArray();
 
         return textureVertices.Any()
-            ? new MeshT(vertices,verticesNormal, textureVertices, facesT, materials)
+            ? new MeshT(vertices, verticesNormal, textureVertices, facesT, materials)
             : new Mesh(vertices, verticesNormal, faces);
     }
 
