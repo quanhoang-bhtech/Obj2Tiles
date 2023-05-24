@@ -582,8 +582,8 @@ public class MeshT : IMesh
 
             Debug.WriteLine("Cluster boundary (percentage): " + clusterBoundary);
 
-            var clusterX = (int)Math.Ceiling(clusterBoundary.Left * textureWidth);
-            var clusterY = (int)Math.Ceiling(clusterBoundary.Top * textureHeight);
+            var clusterX = (int)Math.Floor(clusterBoundary.Left * textureWidth);
+            var clusterY = (int)Math.Floor(clusterBoundary.Top * textureHeight);
             var clusterWidth = (int)Math.Max(Math.Ceiling(clusterBoundary.Width * textureWidth), 1);
             var clusterHeight = (int)Math.Max(Math.Ceiling(clusterBoundary.Height * textureHeight), 1);
 
@@ -795,13 +795,15 @@ public class MeshT : IMesh
     private static List<List<int>> GetFacesClusters(IEnumerable<int> facesIndexes,
         IReadOnlyDictionary<int, List<int>> facesMapper)
     {
-        Debug.Assert(facesIndexes.Any(), "No faces in this cluster");
 
         var clusters = new List<List<int>>();
         var remainingFacesIndexes = new List<int>(facesIndexes);
 
-        var currentCluster = new List<int> { remainingFacesIndexes.First() };
+        var currentCluster = new List<int> { remainingFacesIndexes[0] };
+        var currentClusterCache = new HashSet<int> { remainingFacesIndexes[0] };
         remainingFacesIndexes.RemoveAt(0);
+
+        var lastRemainingFacesCount = remainingFacesIndexes.Count;
 
         while (remainingFacesIndexes.Count > 0)
         {
@@ -817,9 +819,10 @@ public class MeshT : IMesh
                 for (var i = 0; i < connectedFaces.Count; i++)
                 {
                     var connectedFace = connectedFaces[i];
-                    if (currentCluster.Contains(connectedFace)) continue;
-
+                    if (currentClusterCache.Contains(connectedFace)) continue;
+                    
                     currentCluster.Add(connectedFace);
+                    currentClusterCache.Add(connectedFace);
                     remainingFacesIndexes.Remove(connectedFace);
                 }
             }
@@ -834,9 +837,18 @@ public class MeshT : IMesh
                 if (remainingFacesIndexes.Count == 0) break;
 
                 // Let's continue with the next cluster
-                currentCluster = new List<int> { remainingFacesIndexes.First() };
+                currentCluster = new List<int> { remainingFacesIndexes[0] };
+                currentClusterCache = new HashSet<int> { remainingFacesIndexes[0] };
                 remainingFacesIndexes.RemoveAt(0);
             }
+            
+            if (lastRemainingFacesCount == remainingFacesIndexes.Count)
+            {
+                Debug.WriteLine("Discarding " + remainingFacesIndexes.Count + " faces.");
+                break;
+            }
+
+            lastRemainingFacesCount = remainingFacesIndexes.Count;
         }
 
         // Add the cluster
