@@ -1,9 +1,9 @@
 ﻿using CommandLine;
 using Gltf2Tiles.Stages;
+using Gltf2Tiles.Stages.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Obj2Tiles.Library.Geometry;
-using Obj2Tiles.Stages.Model;
 using System.Diagnostics;
 using System.Xml;
 

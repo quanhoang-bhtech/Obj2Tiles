@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
+using Gltf2Tiles.Model;
+using Gltf2Tiles.Stages.Model;
 using Obj2Tiles.Library.Geometry;
-using Obj2Tiles.Stages.Model;
-using Obj2Tiles.Tiles;
 using SilentWave.Obj2Gltf;
 
 namespace Gltf2Tiles;

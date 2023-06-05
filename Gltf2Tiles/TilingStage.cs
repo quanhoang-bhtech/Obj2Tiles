@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Gltf2Tiles.Stages.Model;
 using Newtonsoft.Json;
 using Obj2Tiles.Library.Geometry;
-using Obj2Tiles.Stages.Model;
-using Obj2Tiles.Tiles;
 using SilentWave;
 using SilentWave.Obj2Gltf;
 
