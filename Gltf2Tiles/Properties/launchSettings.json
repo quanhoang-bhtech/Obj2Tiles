@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Gltf2Tiles": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Projects\\INFRALYTIKS\\cesium\\Apps\\SampleData\\out C:\\Projects\\INFRALYTIKS\\cesium\\Apps\\SampleData\\out"
+    }
+  }
+}

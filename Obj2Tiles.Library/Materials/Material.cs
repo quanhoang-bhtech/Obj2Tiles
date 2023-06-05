@@ -61,73 +61,84 @@ public class Material : ICloneable
         RGB? ambientColor = null, diffuseColor = null, specularColor = null;
         double? specularExponent = null, dissolve = null;
         IlluminationModel? illuminationModel = null;
-
-        foreach (var line in lines)
+        try
         {
-            if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
-                continue;
-
-            var parts = line.Split(' ');
-            switch (parts[0])
+            foreach (var line in lines)
             {
-                case "newmtl":
+                if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
+                    continue;
 
-                    if (name.Length > 0)
-                        materials.Add(new Material(name, texture, ambientColor, diffuseColor, specularColor,
-                            specularExponent, dissolve, illuminationModel));
+                var parts = line.Split(' ');
+                switch (parts[0])
+                {
+                    case "newmtl":
 
-                    name = parts[1];
+                        if (name.Length > 0)
+                            materials.Add(new Material(name, texture, ambientColor, diffuseColor, specularColor,
+                                specularExponent, dissolve, illuminationModel));
 
-                    break;
-                case "map_Kd":
-                    texture = Path.IsPathRooted(parts[1])
-                        ? parts[1]
-                        : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path)!, parts[1]));
-                    
-                    deps.Add(texture);
-                    
-                    break;
-                case "Ka":
-                    ambientColor = new RGB(
-                        double.Parse(parts[1], CultureInfo.InvariantCulture),
-                        double.Parse(parts[2], CultureInfo.InvariantCulture),
-                        double.Parse(parts[3], CultureInfo.InvariantCulture));
-                    break;
-                case "Kd":
-                    diffuseColor = new RGB(
-                        double.Parse(parts[1], CultureInfo.InvariantCulture),
-                        double.Parse(parts[2], CultureInfo.InvariantCulture),
-                        double.Parse(parts[3], CultureInfo.InvariantCulture));
-                    break;
-                case "Ks":
-                    specularColor = new RGB(
-                        double.Parse(parts[1], CultureInfo.InvariantCulture),
-                        double.Parse(parts[2], CultureInfo.InvariantCulture),
-                        double.Parse(parts[3], CultureInfo.InvariantCulture));
-                    break;
-                case "Ns":
-                    specularExponent = double.Parse(parts[1], CultureInfo.InvariantCulture);
-                    break;
-                case "d":
-                    dissolve = double.Parse(parts[1], CultureInfo.InvariantCulture);
-                    break;
-                case "Tr":
-                    dissolve = 1 - double.Parse(parts[1], CultureInfo.InvariantCulture);
-                    break;
-                case "illum":
-                    illuminationModel = (IlluminationModel)int.Parse(parts[1]);
-                    break;
-                default:
-                    Debug.WriteLine($"Unknown line: '{line}'");
-                    break;
+                        name = parts[1];
+
+                        break;
+                    case "map_Kd":
+                        texture = Path.IsPathRooted(parts[1])
+                            ? parts[1]
+                            : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path)!, parts[1]));
+
+                        deps.Add(texture);
+
+                        break;
+                    case "Ka":
+                        ambientColor = new RGB(
+                            double.Parse(parts[1], CultureInfo.InvariantCulture),
+                            double.Parse(parts[2], CultureInfo.InvariantCulture),
+                            double.Parse(parts[3], CultureInfo.InvariantCulture));
+                        break;
+                    case "Kd":
+                        diffuseColor = new RGB(
+                            double.Parse(parts[1], CultureInfo.InvariantCulture),
+                            double.Parse(parts[2], CultureInfo.InvariantCulture),
+                            double.Parse(parts[3], CultureInfo.InvariantCulture));
+                        break;
+                    case "Ks":
+                        if (parts.Length == 4)
+                        {
+                            specularColor = new RGB(
+                            double.Parse(parts[1], CultureInfo.InvariantCulture),
+                            double.Parse(parts[2], CultureInfo.InvariantCulture),
+                            double.Parse(parts[3], CultureInfo.InvariantCulture));
+                        }
+                        break;
+                    case "Ns":
+                        specularExponent = double.Parse(parts[1], CultureInfo.InvariantCulture);
+                        break;
+                    case "d":
+                        dissolve = double.Parse(parts[1], CultureInfo.InvariantCulture);
+                        break;
+                    case "Tr":
+                        dissolve = 1 - double.Parse(parts[1], CultureInfo.InvariantCulture);
+                        break;
+                    case "illum":
+                        illuminationModel = (IlluminationModel)int.Parse(parts[1]);
+                        break;
+                    default:
+                        Debug.WriteLine($"Unknown line: '{line}'");
+                        break;
+                }
             }
         }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
 
         materials.Add(new Material(name, texture, ambientColor, diffuseColor, specularColor, specularExponent, dissolve,
             illuminationModel));
 
         dependencies = deps.ToArray();
-        
+
         return materials.ToArray();
     }
 

@@ -11,7 +11,7 @@ public sealed class Options
     [Value(1, MetaName = "Output", Required = true, HelpText = "Output folder.")]
     public string Output { get; set; }
 
-    [Option('s', "stage", Required = false, HelpText = "Stage to stop at (Decimation, Splitting, Tiling)", Default = Stage.Tiling)]
+    [Option('s', "stage", Required = false, HelpText = "Stage to stop at (Decimation, Splitting, Tiling)", Default = Stage.Splitting)]
     public Stage StopAt { get; set; }
 
     [Option('d', "divisions", Required = false, HelpText = "How many tiles divisions", Default = 2)]
@@ -20,7 +20,7 @@ public sealed class Options
     [Option('z', "zsplit", Required = false, HelpText = "Splits along z-axis too", Default = false)]
     public bool ZSplit { get; set; }    
     
-    [Option('l', "lods", Required = false, HelpText = "How many levels of details", Default = 3)]
+    [Option('l', "lods", Required = false, HelpText = "How many levels of details", Default = 1)]
     public int LODs { get; set; }
 
     [Option('k', "keeptextures", Required = false, HelpText = "Keeps original textures", Default = true)]

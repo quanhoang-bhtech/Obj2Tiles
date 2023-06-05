@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Reflection;
-using CommandLine;
-using CommandLine.Text;
+﻿using CommandLine;
+using Gltf2Tiles.Stages;
 using Newtonsoft.Json;
-using Obj2Tiles.Library;
+using Newtonsoft.Json.Linq;
 using Obj2Tiles.Library.Geometry;
-using Obj2Tiles.Stages;
 using Obj2Tiles.Stages.Model;
+using System.Diagnostics;
+using System.Xml;
 
-namespace Obj2Tiles
+namespace Gltf2Tiles
 {
     internal class Program
     {
@@ -21,27 +17,26 @@ namespace Obj2Tiles
 
             if (oResult.Tag == ParserResultType.NotParsed)
             {
-                Console.WriteLine("Usage: obj2tiles [options]");
+                Console.WriteLine("Usage: gltf2tiles [options]");
             }
         }
-
         private static async Task Run(Options opts)
         {
             Console.WriteLine();
-            Console.WriteLine(" *** OBJ to Tiles ***");
+            Console.WriteLine(" *** Gltf to Tiles ***");
             Console.WriteLine();
 
             if (!CheckOptions(opts)) return;
 
             opts.Output = Path.GetFullPath(opts.Output);
             opts.Input = Path.GetFullPath(opts.Input);
-            
+
             Directory.CreateDirectory(opts.Output);
 
             var pipelineId = Guid.NewGuid().ToString();
             var sw = new Stopwatch();
             var swg = Stopwatch.StartNew();
-            
+
             Func<string, string> createTempFolder = opts.UseSystemTempFolder
                 ? s => CreateTempFolder(s, Path.GetTempPath())
                 : s => CreateTempFolder(s, Path.Combine(opts.Output, ".temp"));
@@ -51,49 +46,49 @@ namespace Obj2Tiles
 
             try
             {
-               
-                destFolderDecimation = opts.StopAt == Stage.Decimation
-                    ? opts.Output
-                    : createTempFolder($"{pipelineId}-obj2tiles-decimation");
-
-                Console.WriteLine($" => Decimation stage with {opts.LODs} LODs");
-                sw.Start();
-
-                var decimateRes = await StagesFacade.Decimate(opts.Input, destFolderDecimation, opts.LODs);
-
-                Console.WriteLine(" ?> Decimation stage done in {0}", sw.Elapsed);
-
-                if (opts.StopAt == Stage.Decimation)
-                    return;
-
-                Console.WriteLine();
-                Console.WriteLine(
-                    $" => Splitting stage with {opts.Divisions} divisions {(opts.ZSplit ? "and Z-split" : "")}");
-
-                destFolderSplit = opts.StopAt == Stage.Splitting
-                    ? opts.Output
-                    : createTempFolder($"{pipelineId}-obj2tiles-split");
-
-                var boundsMapper = await StagesFacade.Split(decimateRes.DestFiles, destFolderSplit, opts.Divisions,
-                    opts.ZSplit, decimateRes.Bounds, opts.KeepOriginalTextures);
+                //var boundsMapper;
 
                 Console.WriteLine(" ?> Splitting stage done in {0}", sw.Elapsed);
+                string boundsMapperString = File.ReadAllText(Path.Combine(opts.Input, "boundsMapper.json"));
+                var boundsMapperRaw = JsonConvert.DeserializeObject<JArray>(boundsMapperString);
+                if (boundsMapperRaw != null)
+                {
+                    var boundsMapper = new List<Dictionary<string, Box3>>();
 
-                File.WriteAllText(Path.Combine(opts.Output, "boundsMapper.json"), JsonConvert.SerializeObject(boundsMapper, Formatting.Indented));
+                    foreach (JObject o in boundsMapperRaw.Children<JObject>())
+                    {
+                        //make new dictionary
+                        var box3Arr = new Dictionary<string, Box3>();
 
-                if (opts.StopAt == Stage.Splitting)
-                    return;
-                var gpsCoords = opts.Latitude != null && opts.Longitude != null
-                    ? new GpsCoords(opts.Latitude.Value, opts.Longitude.Value, opts.Altitude)
-                    : null;
+                        foreach (JProperty p in o.Properties())
+                        {
+                            string name = p.Name;
+                            var value = p.Value;
+                            if (value != null)
+                            {
+                                var min = JsonConvert.DeserializeObject<Vertex3>(value["Min"].ToString());
+                                var max = JsonConvert.DeserializeObject<Vertex3>(value["Max"].ToString());
+                                var box3 = new Box3(min, max);
+                                box3Arr.Add(key: name, value: box3);
+                            }
+                        }
 
-                Console.WriteLine();
-                Console.WriteLine($" => Tiling stage {(gpsCoords != null ? $"with GPS coords {gpsCoords}" : "")}");
+                        //add dictionary to list
+                        boundsMapper.Add(box3Arr);
+                    }
+                    var gpsCoords = opts.Latitude != null && opts.Longitude != null
+                        ? new GpsCoords(opts.Latitude.Value, opts.Longitude.Value, opts.Altitude)
+                        : null;
 
-                sw.Restart();
-                StagesFacade.Tile(destFolderSplit, opts.Output, opts.LODs, boundsMapper, gpsCoords);
+                    Console.WriteLine();
+                    Console.WriteLine($" => Tiling stage {(gpsCoords != null ? $"with GPS coords {gpsCoords}" : "")}");
 
-                Console.WriteLine(" ?> Tiling stage done in {0}", sw.Elapsed);
+                    sw.Restart();
+                    StagesFacade.Tile(opts.Input, opts.Output, opts.LODs, boundsMapper.ToArray(), gpsCoords);
+
+                    Console.WriteLine(" ?> Tiling stage done in {0}", sw.Elapsed);
+                }
+                Console.WriteLine(" ?> Missing bound box data");
             }
             catch (Exception ex)
             {
@@ -110,7 +105,7 @@ namespace Obj2Tiles
                 {
                     Console.WriteLine(
                         $" ?> Skipping cleanup, intermediate files are in '{tmpFolder}' with pipeline id '{pipelineId}'");
-                    
+
                     Console.WriteLine(" ?> You should delete this folder manually, it is only for debugging purposes");
                 }
                 else
@@ -133,38 +128,31 @@ namespace Obj2Tiles
         }
 
         private static bool CheckOptions(Options opts)
-       {
+        {
 
             if (string.IsNullOrWhiteSpace(opts.Input))
             {
                 Console.WriteLine(" !> Input file is required");
                 return false;
             }
-            
-            if (!File.Exists(opts.Input))
-            {
-                Console.WriteLine(" !> Input file does not exist");
-                return false;
-            }
-            
+
+            //if (!File.Exists(opts.Input))
+            //{
+            //    Console.WriteLine(" !> Input file does not exist");
+            //    return false;
+            //}
+
             if (string.IsNullOrWhiteSpace(opts.Output))
             {
                 Console.WriteLine(" !> Output folder is required");
                 return false;
             }
-            
-            if (opts.LODs < 1)
-            {
-                Console.WriteLine(" !> LODs must be at least 1");
-                return false;
-            }
-            
-            if (opts.Divisions < 0)
-            {
-                Console.WriteLine(" !> Divisions must be non-negative");
-                return false;
-            }
-            
+
+            //if (opts.LODs < 1)
+            //{
+            //    Console.WriteLine(" !> LODs must be at least 1");
+            //    return false;
+            //}
             return true;
         }
 

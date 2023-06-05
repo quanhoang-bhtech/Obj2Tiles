@@ -5,10 +5,11 @@ namespace Obj2Tiles.Library.Geometry;
 
 public class Vertex3
 {
-    [JsonInclude] public readonly double X;
-    [JsonInclude] public readonly double Y;
-    [JsonInclude] public readonly double Z;
+    [JsonInclude] public double X { get; set; }
+    [JsonInclude] public double Y { get; set; }
+    [JsonInclude] public double Z { get; set; }
 
+    public Vertex3() { }
     public Vertex3(double x, double y, double z)
     {
         X = x;
