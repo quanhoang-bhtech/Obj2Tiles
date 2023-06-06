@@ -88,7 +88,10 @@ namespace Gltf2Tiles
 
                     Console.WriteLine(" ?> Tiling stage done in {0}", sw.Elapsed);
                 }
-                Console.WriteLine(" ?> Missing bound box data");
+                else
+                {
+                    Console.WriteLine(" ?> Missing bound box data");
+                }
             }
             catch (Exception ex)
             {
